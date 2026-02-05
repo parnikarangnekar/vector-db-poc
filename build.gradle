@@ -1,0 +1,21 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'dev.langchain4j:langchain4j:0.35.0'
+    implementation 'dev.langchain4j:langchain4j-core:0.35.0'
+    implementation 'dev.langchain4j:langchain4j-google-ai-gemini:0.35.0'
+    implementation 'dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:0.35.0'
+    implementation 'dev.langchain4j:langchain4j-pgvector:0.35.0'
+    implementation 'org.postgresql:postgresql:42.7.2'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+}
+
+application {
+    mainClass.set('com.example.Main')
+}
