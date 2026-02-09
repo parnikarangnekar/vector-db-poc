@@ -36,17 +36,19 @@ public class Main {
         EmbeddingStore<TextSegment> embeddingStore = PgVectorEmbeddingStore.builder()
                 .host("localhost")
                 .port(5432)
-                .database("vectordb")
-                .user("postgres")
-                .password("hotwax@786")
-                .table("documents")
+                .database("")
+                .user("")
+                .password("")
+                .table("")
                 .dimension(384)
                 .createTable(true)
                 .build();
 
         if ("ingest".equalsIgnoreCase(command)) {
             System.out.println("--- Ingest Mode ---");
-            String startPath = (args.length > 1) ? args[1] : "documentation.md";
+            if (args.length > 1) {
+                for (int i = 1; i < args.length; i++) {
+                    String startPath = args[i];
             System.out.println("Ingesting from: " + startPath);
 
             java.nio.file.Path path = java.nio.file.Paths.get(startPath);
@@ -55,7 +57,7 @@ public class Main {
                 return;
             }
 
-            DocumentSplitter splitter = DocumentSplitters.recursive(300, 30);
+                    DocumentSplitter splitter = DocumentSplitters.recursive(512, 100);
 
             try (java.util.stream.Stream<java.nio.file.Path> paths = java.nio.file.Files.walk(path)) {
                 paths.filter(java.nio.file.Files::isRegularFile)
@@ -82,37 +84,16 @@ public class Main {
             } catch (IOException e) {
                 System.out.println("Error walking files: " + e.getMessage());
             }
-            System.out.println("Ingestion completed.");
-
-        } else if ("search".equalsIgnoreCase(command)) {
-            if (args.length < 2) {
-                System.out.println("Please provide a search query. Example: ./gradlew run --args=\"search 'term'\"");
-                return;
-            }
-            String query = args[1];
-            System.out.println("--- Search Mode ---");
-            System.out.println("Query: " + query);
-
-            Embedding queryEmbedding = embeddingModel.embed(query).content();
-            List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(queryEmbedding, 5, 0.6);
-
-            if (!relevant.isEmpty()) {
-                System.out.println("\nFound " + relevant.size() + " relevant results:\n");
-                for (int i = 0; i < relevant.size(); i++) {
-                    System.out.println(
-                            "[" + (i + 1) + "] (Score: " + String.format("%.4f", relevant.get(i).score()) + ")");
-                    System.out.println(relevant.get(i).embedded().text());
-                    System.out.println("--------------------------------------------------");
                 }
             } else {
-                System.out.println("No results found.");
+                System.out.println("Missing Arguments");
             }
         } else if ("reset".equalsIgnoreCase(command)) {
             System.out.println("--- Reset Mode ---");
             try (java.sql.Connection conn = java.sql.DriverManager
-                    .getConnection("jdbc:postgresql://localhost:5432/vectordb", "postgres", "hotwax@786");
+                    .getConnection("jdbc:postgresql://localhost:5432/<database_name>", "", "");
                     java.sql.Statement stmt = conn.createStatement()) {
-                stmt.execute("TRUNCATE TABLE documents");
+                stmt.execute("TRUNCATE TABLE <table_name>");
                 System.out.println("Table 'documents' cleared.");
             } catch (Exception e) {
                 e.printStackTrace();
